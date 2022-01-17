@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>husky_accessories</name>
+  <version>0.0.0</version>
+  <description>The husky_accessories package</description>
+  <maintainer email="gregory.baker@brl.ac.uk">greg</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>aliencontrol</depend>
+  <depend>dynamixel_pan_tilt</depend>
+  <depend>rplidar_ros</depend>
+  <depend>usb_cam</depend>
+  <depend>laser_filters</depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
