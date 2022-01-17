@@ -4,3 +4,6 @@
 [submodule "kinova_joy_teleop"]
 	path = kinova_joy_teleop
 	url = git@github.com:Gregory-Baker/kinova_joy_teleop.git
+[submodule "husky_accessories/kinova_joy_teleop"]
+	path = husky_accessories/kinova_joy_teleop
+	url = git@github.com:Gregory-Baker/kinova_joy_teleop.git
