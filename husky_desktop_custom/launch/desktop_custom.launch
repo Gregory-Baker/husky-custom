@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="mapping" default="true" doc="spawn cartographer mapping"/>
+  <arg name="move_base" default="false" doc="spawn move_base"/>
+  
+  <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
+  
+  <arg name="rviz" default="true" doc="spawn rviz"/>
+  <arg name="rviz_config" default="map" unless="$(eval mapping == 'none')"/>
+  <arg name="rviz_config" value="scan" if="$(eval mapping == 'none')"/>
+  
+  <arg name="record" default="false" doc="rosbag record topics"/>
+  <arg name="participant_id" doc="integer value corresponding to"/>
+  <arg name="camera" doc="zed or theta"/>
+  <arg name="task" doc="N=navigation, M=manipulation"/>
+
+
+  <group if="$(arg mapping)">
+    <include file="$(find husky_cartographer_navigation)/launch/cartographer.launch"/>
+  </group>
+
+  <group if="$(arg unity)">
+    <include file="$(find ros_tcp_endpoint)/launch/endpoint.launch"/>  
+  </group>
+
+  <group if="$(arg rviz)">
+    <include file="$(find p3at_viz)/launch/view_robot.launch">
+      <arg name="config" value="$(arg rviz_config)"/>
+    </include>
+  </group>
+
+  <group if="$(arg record)">
+    <node pkg="aliencontrol" type="aliencontrol" name="folder_creator">
+      <param name="cmd" value="mkdir -p $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/$(arg task)"/>
+    </node>
+    <node pkg="rosbag" type="record" name="rosbag_record_node"
+        args="record 
+        -o $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/$(arg task) 
+        /rosout /tf /odometry/filtered /map /scan /cmd_vel /usb_cam/image_raw/compressed /head_rot /joy_teleop/joy"/>   
+  </group>
+
+</launch>
