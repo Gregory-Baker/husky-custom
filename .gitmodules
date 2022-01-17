@@ -1,0 +1,3 @@
+[submodule "husky_cartographer_navigation"]
+	path = husky_cartographer_navigation
+	url = git@github.com:Gregory-Baker/husky_cartographer_navigation.git
