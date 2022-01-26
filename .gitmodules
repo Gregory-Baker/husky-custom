@@ -1,3 +1,6 @@
 [submodule "husky_cartographer_navigation"]
 	path = husky_cartographer_navigation
 	url = git@github.com:Gregory-Baker/husky_cartographer_navigation.git
+[submodule "husky_accessories/kinova_joy_teleop"]
+	path = husky_custom_packages/kinova_joy_teleop
+	url = git@github.com:Gregory-Baker/kinova_joy_teleop.git
