@@ -16,7 +16,7 @@
 
 
   <group if="$(arg mapping)">
-    <include file="$(find p3at_navigation)/launch/cartographer.launch">
+    <include file="$(find husky_cartographer_navigation)/launch/cartographer.launch">
       <arg name="move_base" value="$(arg move_base)"/>
     </include>
   </group>
@@ -26,7 +26,7 @@
   </group>
 
   <group if="$(arg rviz)">
-    <include file="$(find husky_viz)/launch/view_robot.launch">
+    <include file="$(find p3at_viz)/launch/view_robot.launch">
       <arg name="config" value="$(arg rviz_config)"/>
     </include>
   </group>
