@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="mapping" default="true" doc="spawn cartographer mapping"/>
+  <arg name="mapping" default="cartographer" doc="spawn cartographer mapping"/>
   <arg name="move_base" default="false" doc="spawn move_base"/>
   
   <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
@@ -9,16 +9,33 @@
   <arg name="rviz_config" default="map" unless="$(eval mapping == 'none')"/>
   <arg name="rviz_config" value="scan" if="$(eval mapping == 'none')"/>
   
-  <arg name="record" default="false" doc="rosbag record topics"/>
-  <arg name="participant_id" doc="integer value corresponding to"/>
-  <arg name="camera" doc="zed or theta"/>
+  <arg name="id" default="dev" doc="integer value corresponding to"/>
+  <arg name="camera" doc="zed, zed_novr or theta"/>
   <arg name="task" doc="nav=navigation, man=manipulation"/>
 
+  <arg name="joystick" default="true" doc="joystick at teleop station"/>
+  <arg name="joy_dev" default="$(optenv HUSKY_JOY_DEVICE /dev/input/js0)" />
+  <arg name="kinova" default="true" />
 
-  <group if="$(arg mapping)">
+  <arg name="record_shimmer_data" default="true"/>
+
+  <arg name="record_video" default="true"/>
+
+  <group unless="$(eval id == 'test')">
+    <node pkg="aliencontrol" type="aliencontrol" name="folder_creator">
+      <param name="cmd" value="mkdir -p $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)"/>
+    </node>
+  </group>
+
+
+  <group if="$(eval mapping == 'cartographer')">
     <include file="$(find husky_cartographer_navigation)/launch/cartographer.launch">
       <arg name="move_base" value="$(arg move_base)"/>
     </include>
+  </group>
+
+  <group if="$(eval mapping == 'slam_toolbox')">
+    <include file="$(find slam_toolbox)/launch/online_async.launch"/>
   </group>
 
   <group if="$(arg unity)">
@@ -31,14 +48,78 @@
     </include>
   </group>
 
-  <group if="$(arg record)">
-    <node pkg="aliencontrol" type="aliencontrol" name="folder_creator">
-      <param name="cmd" value="mkdir -p $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/$(arg task)"/>
+  <group if="$(arg joystick)">
+    <group ns="joy_teleop_desktop">
+      <rosparam command="load" file="$(find husky_desktop_custom)/config/teleop_logitech.yaml" />
+      <param name="joy_node/dev" value="$(arg joy_dev)" />
+      <node pkg="joy" type="joy_node" name="joy_node" />
+      <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
+
+      <group if="$(arg kinova)">
+        <node name="kinova_joy_teleop" type="kinova_joy_teleop.py" pkg="kinova_joy_teleop">
+          <param name="restricted_mode" value="true"/>
+          <param name="arm_ns" value="/kinova_arm"/>
+        </node>
+      </group>
+
+      <group if="$(eval camera == 'zed_novr')">
+        <node pkg="dynamixel_pan_tilt" type="dynamixel_pan_tilt_joy.py" name="dynamixel_pan_tilt_joy_desktop"/>
+      </group>
+    </group>
+  </group>
+
+  <group unless="$(eval id == 'dev')">
+    <include file="$(find husky_desktop_custom)/launch/cv_cam.launch">
+      <arg name="device_id" value="0"/>
+      <arg name="camera_name" value="cam1"/>
+      <arg name="width" value="1920"/>
+      <arg name="height" value="1080"/>
+      <arg name="framerate" value="15"/>
+    </include>
+    <include file="$(find husky_desktop_custom)/launch/cv_cam.launch">
+      <arg name="device_id" value="2"/>
+      <arg name="camera_name" value="cam2"/>
+      <arg name="width" value="1920"/>
+      <arg name="height" value="1080"/>
+      <arg name="framerate" value="15"/>
+    </include>
+    <include file="$(find husky_desktop_custom)/launch/cv_cam.launch">
+      <arg name="device_id" value="4"/>
+      <arg name="camera_name" value="cam3"/>
+      <arg name="width" value="1920"/>
+      <arg name="height" value="1080"/>
+      <arg name="framerate" value="15"/>
+    </include>
+  </group>
+  
+
+
+  <group unless="$(eval id == 'dev')">
+    <node pkg="aliencontrol" type="aliencontrol" name="folder_creator2">
+      <param name="cmd" value="mkdir -p $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)"/>
     </node>
     <node pkg="rosbag" type="record" name="rosbag_record_node"
         args="record 
-        -o $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/$(arg task) 
-        /rosout /tf /odometry/filtered /map /scan_filtered /cmd_vel /head_rot /joy_teleop/joy"/>   
+        -o $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/mr_teleop 
+        /rosout /tf /odometry/filtered /scan_filtered /map /cmd_vel /head_rot"/>
+  </group>
+
+  <group if="$(arg record_shimmer_data)">
+    <node pkg="aliencontrol" type="aliencontrol" name="shimmer_handler">
+      <param name="cmd" value="python3 /home/greg/Documents/pyshimmer-examples/shimmer-bt-example.py"/>
+    </node>
+  </group>
+
+  <group if="$(arg record_video)">
+    <node pkg="image_view" type="video_recorder" name="cam1_recorder" args="image:=/cam1/image_raw">
+      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam1.avi"/>
+    </node>
+    <node pkg="image_view" type="video_recorder" name="cam2_recorder" args="image:=/cam2/image_raw">
+      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam2.avi"/>
+    </node>
+    <node pkg="image_view" type="video_recorder" name="cam3_recorder" args="image:=/cam3/image_raw">
+      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam3.avi"/>
+    </node>
   </group>
 
 </launch>
