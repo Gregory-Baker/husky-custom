@@ -8,8 +8,8 @@ Environment Variables generally derived from /etc/ros/setup.bash
 
 <launch>
 
-  <arg name="camera" default="zed"/>
-  <arg name="kinova_joy_restricted" value="false"/>
+  <arg name="camera"/>
+  <arg name="kinova_joy_restricted" value="true"/>
 
   <group if="$(optenv RPLIDAR 0)">
     <include file="$(find rplidar_ros)/launch/rplidar.launch" />
@@ -51,7 +51,7 @@ Environment Variables generally derived from /etc/ros/setup.bash
   <group if="$(eval arg('camera') == 'theta')">
     <node pkg="aliencontrol" type="aliencontrol" name="aliencontrol_theta">
       <param name="cmd" 
-            value="gst-launch-1.0 thetauvcsrc mode=4K ! queue ! h264parse ! rtph264pay mtu=1400 ! udpsink host=192.168.1.170 port=7000 sync=false"/>
+            value="gst-launch-1.0 thetauvcsrc mode=4K ! queue ! h264parse ! rtph264pay mtu=1400 ! udpsink host=192.168.1.114 port=7000 sync=false"/>
     </node>
   </group>
 
