@@ -1,0 +1,16 @@
+<launch>
+  <arg name="device_id" default="0"/>
+  <arg name="width" default="640"/>
+  <arg name="height" default="480"/>
+  <arg name="camera_name" default="cv_camera"/>
+  <arg name="framerate" default="30"/>
+
+  <node name="$(arg camera_name)" pkg="cv_camera" type="cv_camera_node">
+    <param name="device_id" value="$(arg device_id)" />
+    <param name="image_width" value="$(arg width)" />
+    <param name="image_height" value="$(arg height)" />
+    <param name="frame_id" value="$(arg camera_name)" />
+    <param name="rate" value="$(arg framerate)"/>
+  </node>
+
+</launch>

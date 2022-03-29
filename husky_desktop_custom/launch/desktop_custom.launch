@@ -17,16 +17,9 @@
   <arg name="joy_dev" default="$(optenv HUSKY_JOY_DEVICE /dev/input/js0)" />
   <arg name="kinova" default="true" />
 
-  <arg name="record_shimmer_data" default="true"/>
+  <arg name="record_shimmer_data" default="false"/>
 
   <arg name="record_video" default="true"/>
-
-  <group unless="$(eval id == 'test')">
-    <node pkg="aliencontrol" type="aliencontrol" name="folder_creator">
-      <param name="cmd" value="mkdir -p $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)"/>
-    </node>
-  </group>
-
 
   <group if="$(eval mapping == 'cartographer')">
     <include file="$(find husky_cartographer_navigation)/launch/cartographer.launch">
@@ -90,35 +83,43 @@
       <arg name="height" value="1080"/>
       <arg name="framerate" value="15"/>
     </include>
+    <include file="$(find husky_desktop_custom)/launch/cv_cam.launch">
+      <arg name="device_id" value="6"/>
+      <arg name="camera_name" value="cam4"/>
+      <arg name="width" value="1920"/>
+      <arg name="height" value="1080"/>
+      <arg name="framerate" value="15"/>
+    </include>
+
   </group>
   
 
 
   <group unless="$(eval id == 'dev')">
-    <node pkg="aliencontrol" type="aliencontrol" name="folder_creator2">
-      <param name="cmd" value="mkdir -p $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)"/>
-    </node>
     <node pkg="rosbag" type="record" name="rosbag_record_node"
         args="record 
         -o $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/mr_teleop 
-        /rosout /tf /odometry/filtered /scan_filtered /map /cmd_vel /head_rot"/>
+        /rosout /tf /odometry/filtered /scan_filtered /map /cmd_vel /head_rot /sickness_log"/>
   </group>
 
   <group if="$(arg record_shimmer_data)">
-    <node pkg="aliencontrol" type="aliencontrol" name="shimmer_handler">
-      <param name="cmd" value="python3 /home/greg/Documents/pyshimmer-examples/shimmer-bt-example.py"/>
+    <node pkg="aliencontrol" type="aliencontrol" name="shimmer_handler" output="screen">
+      <param name="cmd" value="python3 /home/greg/Documents/pyshimmer-examples/bt_test.py /dev/rfcomm1 $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/shimmer_$(arg id)_$(arg camera).csv"/>
     </node>
   </group>
 
   <group if="$(arg record_video)">
     <node pkg="image_view" type="video_recorder" name="cam1_recorder" args="image:=/cam1/image_raw">
-      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam1.avi"/>
+      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam1_$(arg id)_$(arg camera).avi"/>
     </node>
     <node pkg="image_view" type="video_recorder" name="cam2_recorder" args="image:=/cam2/image_raw">
-      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam2.avi"/>
+      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam2_$(arg id)_$(arg camera).avi"/>
     </node>
     <node pkg="image_view" type="video_recorder" name="cam3_recorder" args="image:=/cam3/image_raw">
-      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam3.avi"/>
+      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam3_$(arg id)_$(arg camera).avi"/>
+    </node>
+    <node pkg="image_view" type="video_recorder" name="cam4_recorder" args="image:=/cam4/image_raw">
+      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam4_$(arg id)_$(arg camera).avi"/>
     </node>
   </group>
 

@@ -19,6 +19,7 @@
   <depend>husky_cartographer_navigation</depend>
   <depend>husky_viz</depend>
   <depend>ros_tcp_endpoint</depend>
+  <depend>rospy</depend>
 
   <export>
     <!-- Other tools can request additional information be placed here -->
