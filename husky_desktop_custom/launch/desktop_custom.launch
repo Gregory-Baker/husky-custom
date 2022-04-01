@@ -100,27 +100,29 @@
         args="record 
         -o $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/mr_teleop 
         /rosout /tf /odometry/filtered /scan_filtered /map /cmd_vel /head_rot /sickness_log"/>
+
+    <group if="$(arg record_shimmer_data)">
+      <node pkg="aliencontrol" type="aliencontrol" name="shimmer_handler" output="screen">
+        <param name="cmd" value="python3 /home/greg/Documents/pyshimmer-examples/bt_test.py /dev/rfcomm1 $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/shimmer_$(arg id)_$(arg camera).csv"/>
+      </node>
+    </group>
+
+    <group if="$(arg record_video)">
+      <node pkg="image_view" type="video_recorder" name="cam1_recorder" args="image:=/cam1/image_raw">
+        <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam1_$(arg id)_$(arg camera).avi"/>
+      </node>
+      <node pkg="image_view" type="video_recorder" name="cam2_recorder" args="image:=/cam2/image_raw">
+        <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam2_$(arg id)_$(arg camera).avi"/>
+      </node>
+      <node pkg="image_view" type="video_recorder" name="cam3_recorder" args="image:=/cam3/image_raw">
+        <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam3_$(arg id)_$(arg camera).avi"/>
+      </node>
+      <node pkg="image_view" type="video_recorder" name="cam4_recorder" args="image:=/cam4/image_raw">
+        <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam4_$(arg id)_$(arg camera).avi"/>
+      </node>
+    </group>
   </group>
 
-  <group if="$(arg record_shimmer_data)">
-    <node pkg="aliencontrol" type="aliencontrol" name="shimmer_handler" output="screen">
-      <param name="cmd" value="python3 /home/greg/Documents/pyshimmer-examples/bt_test.py /dev/rfcomm1 $(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/shimmer_$(arg id)_$(arg camera).csv"/>
-    </node>
-  </group>
 
-  <group if="$(arg record_video)">
-    <node pkg="image_view" type="video_recorder" name="cam1_recorder" args="image:=/cam1/image_raw">
-      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam1_$(arg id)_$(arg camera).avi"/>
-    </node>
-    <node pkg="image_view" type="video_recorder" name="cam2_recorder" args="image:=/cam2/image_raw">
-      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam2_$(arg id)_$(arg camera).avi"/>
-    </node>
-    <node pkg="image_view" type="video_recorder" name="cam3_recorder" args="image:=/cam3/image_raw">
-      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam3_$(arg id)_$(arg camera).avi"/>
-    </node>
-    <node pkg="image_view" type="video_recorder" name="cam4_recorder" args="image:=/cam4/image_raw">
-      <param name="filename" value="$(env HOME)/Experiment_Data/$(arg id)/$(arg camera)/cam4_$(arg id)_$(arg camera).avi"/>
-    </node>
-  </group>
 
 </launch>
