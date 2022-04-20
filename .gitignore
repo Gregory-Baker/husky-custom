@@ -51,4 +51,4 @@ qtcreator-*
 CATKIN_IGNORE
 
 # Visual Studio
-.vscode/browse.vc.db
+*.vscode/
