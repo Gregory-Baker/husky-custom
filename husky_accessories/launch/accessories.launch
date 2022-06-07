@@ -8,8 +8,10 @@ Environment Variables generally derived from /etc/ros/setup.bash
 
 <launch>
 
-  <arg name="camera"/>
+  <arg name="camera" default="zed"/>
+  <arg name="kinova_joy" default="true"/>
   <arg name="kinova_joy_restricted" value="true"/>
+  <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
 
   <group if="$(optenv RPLIDAR 0)">
     <include file="$(find rplidar_ros)/launch/rplidar.launch" />
@@ -58,12 +60,13 @@ Environment Variables generally derived from /etc/ros/setup.bash
   <group if="$(optenv HUSKY_KINOVA 0)">
     <include file="$(find husky_kinova_bringup)/launch/husky_gen3_bringup.launch">
       <arg name="gripper" value="robotiq_2f_85"/>
-      <arg name="start_moveit" value="false"/>
     </include>
 
-    <include file="$(find kinova_joy_teleop)/launch/kinova_joy_teleop.launch">
-      <arg name="restricted_mode" value="$(arg kinova_joy_restricted)"/>
-    </include>
+    <group if="$(arg kinova_joy)">
+      <include file="$(find kinova_joy_teleop)/launch/kinova_joy_teleop.launch">
+        <arg name="restricted_mode" value="$(arg kinova_joy_restricted)"/>
+      </include>
+    </group>
   </group>
 
 
@@ -75,6 +78,12 @@ Environment Variables generally derived from /etc/ros/setup.bash
       <!--param name="image_height" value="480" /-->
       <param name="pixel_format" value="yuyv" />
     </node>
+  </group>
+
+  <group if="$(arg unity)">
+    <include file="$(find ros_tcp_endpoint)/launch/endpoint.launch">  
+      <arg name="tcp_ip" value="192.168.1.117"/>
+    </include>
   </group>
 
 </launch>
