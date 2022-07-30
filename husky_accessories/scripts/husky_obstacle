@@ -31,8 +31,17 @@ class Obstacle():
     def __init__(self, scan_topic, pub_topic):
         self._scan_sub = rospy.Subscriber(scan_topic, self.scan_callback)
         self._cmd_pub = rospy.Publisher(pub_topic, Twist, queue_size=1)
-        
-    def get_scan(self):
+
+
+    def scan_callback(self, data):
+        min_distance = min(data.lidar_distances)
+
+        if min_distance < SAFE_STOP_DISTANCE:
+            twist = Twist()
+            self._cmd_pub.publish(twist)
+            rospy.loginfo('Stop!')
+
+    def scan_scan(self):
         scan = rospy.wait_for_message('scan', LaserScan)
         scan_filter = []
        
@@ -91,9 +100,11 @@ def main():
     pub_topic = rospy.get_param("~pub_topic", "~cmd_vel")
     obstacle = Obstacle(scan_topic, pub_topic)
     try:
-        obstacle = Obstacle(scan_topic, pub_topic)
+        rospy.spin
     except rospy.ROSInterruptException:
         pass
+    except KeyboardInterrupt:
+        return
 
 if __name__ == '__main__':
     main()
