@@ -9,7 +9,7 @@ Environment Variables generally derived from /etc/ros/setup.bash
 <launch>
 
   <arg name="camera" default="zed"/>
-  <arg name="kinova_joy" default="true"/>
+  <arg name="kinova_joy" default="false"/>
   <arg name="kinova_joy_restricted" value="true"/>
   <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
 
@@ -27,7 +27,9 @@ Environment Variables generally derived from /etc/ros/setup.bash
 
   <group if="$(eval arg('camera') == 'zed')">
     <group if="$(optenv PAN_TILT 0)">
-      <node pkg="dynamixel_pan_tilt" type="dynamixel_pan_tilt_node.py" name="dynamixel_pan_tilt_node"/>
+      <node pkg="dynamixel_pan_tilt" type="dynamixel_pan_tilt_node.py" name="dynamixel_pan_tilt_node">
+        <param name="pan_tilt_angle_topic" value="/pan_tilt_angle"/>
+      </node>
     </group>
 
     <node pkg="aliencontrol" type="aliencontrol" name="aliencontrol_zedstream">
@@ -60,6 +62,7 @@ Environment Variables generally derived from /etc/ros/setup.bash
   <group if="$(optenv HUSKY_KINOVA 0)">
     <include file="$(find husky_kinova_bringup)/launch/husky_gen3_bringup.launch">
       <arg name="gripper" value="robotiq_2f_85"/>
+      <arg name="use_hard_limits" value="false"/>
     </include>
 
     <group if="$(arg kinova_joy)">
