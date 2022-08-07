@@ -19,6 +19,8 @@ Environment Variables generally derived from /etc/ros/setup.bash
     <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
       <rosparam command="load" file="$(find husky_accessories)/config/husky_laser_filter.yaml" />
     </node>
+
+    <node pkg="husky_accessories" type="husky_obstacle" name="husky_obstacle"/>
   </group>
   
   <group if="$(optenv RADEYE 0)">

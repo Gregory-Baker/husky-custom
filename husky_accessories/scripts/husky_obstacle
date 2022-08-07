@@ -22,24 +22,40 @@ import math
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
-LINEAR_VEL = 0.22
-STOP_DISTANCE = 0.2
+LINEAR_VEL = 0.2
+STOP_DISTANCE = 0.25
 LIDAR_ERROR = 0.05
 SAFE_STOP_DISTANCE = STOP_DISTANCE + LIDAR_ERROR
 
 class Obstacle():
-    def __init__(self, scan_topic, pub_topic):
-        self._scan_sub = rospy.Subscriber(scan_topic, self.scan_callback)
+    _cmd_sub = []
+
+    def __init__(self, scan_topic, cmd_vel_topics, pub_topic):
+        self._safety_stop = False
+        self._scan_sub = rospy.Subscriber(scan_topic, LaserScan, self.scan_callback)
+        self._cmd_sub = []
+        for i in range(len(cmd_vel_topics)):
+            self._cmd_sub.append(rospy.Subscriber(cmd_vel_topics[i], Twist, self.cmd_vel_callback))
+        # self._cmd_sub = rospy.Subscriber(cmd_vel_topic, Twist, self.cmd_vel_callback)
+        # self._cmd_sub = rospy.Subscriber("/cmd_vel", Twist, self.cmd_vel_callback)
         self._cmd_pub = rospy.Publisher(pub_topic, Twist, queue_size=1)
 
 
     def scan_callback(self, data):
-        min_distance = min(data.lidar_distances)
+        min_distance = min(data.ranges)
 
         if min_distance < SAFE_STOP_DISTANCE:
-            twist = Twist()
-            self._cmd_pub.publish(twist)
+            self._safety_stop = True
             rospy.loginfo('Stop!')
+        else:
+            self._safety_stop = False
+
+    def cmd_vel_callback(self, data):
+
+        if (data.linear.x > 0):
+            if (self._safety_stop):
+                twist = Twist()
+                self._cmd_pub.publish(twist)
 
     def scan_scan(self):
         scan = rospy.wait_for_message('scan', LaserScan)
@@ -96,15 +112,19 @@ class Obstacle():
 
 def main():
     rospy.init_node('husky_obstacle')
-    scan_topic = rospy.get_param("~scan_topic", "/scan")
+    scan_topic = rospy.get_param("~scan_topic", "/scan_filtered")
+    cmd_vel_topics = ["/cmd_vel"]
+    cmd_vel_topics.append("/joy_teleop/cmd_vel")
+    cmd_vel_topics.append(rospy.get_param("~cmd_vel_topic", "/joy_teleop_desktop/cmd_vel"))
     pub_topic = rospy.get_param("~pub_topic", "~cmd_vel")
-    obstacle = Obstacle(scan_topic, pub_topic)
-    try:
-        rospy.spin
-    except rospy.ROSInterruptException:
-        pass
-    except KeyboardInterrupt:
-        return
+    obstacle = Obstacle(scan_topic, cmd_vel_topics, pub_topic)
+    while not rospy.is_shutdown():
+        try:
+            rospy.spin
+        except rospy.ROSInterruptException:
+            pass
+        except KeyboardInterrupt:
+            return
 
 if __name__ == '__main__':
     main()
