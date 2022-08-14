@@ -3,14 +3,14 @@
   <arg name="mapping" default="cartographer" doc="spawn cartographer mapping"/>
   <arg name="move_base" default="false" doc="spawn move_base"/>
   
-  <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
+  <arg name="unity" default="false" doc="spawn ros_tcp_endpoint for Unity link"/>
   
   <arg name="rviz" default="true" doc="spawn rviz"/>
   <arg name="rviz_config" default="map" unless="$(eval mapping == 'none')"/>
   <arg name="rviz_config" value="scan" if="$(eval mapping == 'none')"/>
   
   <arg name="id" default="dev" doc="integer value corresponding to"/>
-  <arg name="camera" doc="zed, zed_novr or theta"/>
+  <arg name="camera" default="none" doc="zed, zed_novr or theta"/>
   <arg name="task" doc="nav=navigation, man=manipulation"/>
 
   <arg name="joystick" default="true" doc="joystick at teleop station"/>
