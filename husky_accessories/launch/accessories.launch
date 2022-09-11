@@ -12,6 +12,7 @@ Environment Variables generally derived from /etc/ros/setup.bash
   <arg name="kinova_joy" default="true"/>
   <arg name="kinova_joy_restricted" value="true"/>
   <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
+  <arg name="navigation" default="true"/>
 
   <group if="$(optenv RPLIDAR 0)">
     <include file="$(find rplidar_ros)/launch/rplidar.launch" />
@@ -59,6 +60,15 @@ Environment Variables generally derived from /etc/ros/setup.bash
       <param name="cmd" 
             value="gst-launch-1.0 thetauvcsrc mode=4K ! queue ! h264parse ! rtph264pay mtu=1400 ! udpsink host=192.168.1.114 port=7000 sync=false"/>
     </node>
+  </group>
+
+  <!-- Navigation and Mapping-->
+  <group if="$(arg navigation)">
+    <include file="$(find husky_navigation)/launch/gmapping_demo.launch"/>
+    <!-- <include file="$(find move_basic)/launch/move_basic.launch"/> -->
+    <node name="move_distance_server" pkg="husky_custom_actions" type="move_distance_server.py"/>
+    <node name="turn_robot_server" pkg="husky_custom_actions" type="turn_robot_server.py"/>
+    <node name="odom_navigation_server" pkg="husky_custom_actions" type="odom_navigation_server.py"/>
   </group>
 
 
