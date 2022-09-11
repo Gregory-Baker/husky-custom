@@ -73,7 +73,7 @@ Environment Variables generally derived from /etc/ros/setup.bash
   </group>
 
   <!-- Husky teleop on secondary joystick -->
-  <group if="$(arg mobile_teleop)"/>
+  <group if="$(arg mobile_teleop)">
     <group ns="joy_teleop_desktop">
       <rosparam command="load" file="$(find husky_accessories)/config/teleop_logitech.yaml" />
       <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
