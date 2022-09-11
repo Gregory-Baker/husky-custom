@@ -4,6 +4,12 @@
     <arg name="joystick" default="true" doc="joystick at teleop station"/>
     <arg name="joy_dev" default="$(optenv HUSKY_JOY_DEVICE /dev/input/js0)" />
     <arg name="kinova_joy" default="true" />
+    <arg name="navigation" default="false"/>
+    <arg name="manipulation" default="false"/>
+    <arg name="viz" default="true"/>
+    
+    <arg name="rviz_config" value="mapping.rviz" unless="$(arg manipulation)"/>
+    <arg name="rviz_config" value="mobile_manipulation.rviz" if="$(arg manipulation)"/>
 
     <!--Participant id-->
     <arg name="id" default="0"/>
@@ -26,23 +32,27 @@
     <arg name="part" default="1"/>
 
     <!-- Navigation and Mapping-->
-    <include file="$(find husky_navigation)/launch/gmapping_demo.launch"/>
-    <!-- <include file="$(find move_basic)/launch/move_basic.launch"/> -->
-
-
-    <node name="move_distance_server" pkg="kinova_custom_actions" type="move_distance_server.py"/>
-    <node name="turn_robot_server" pkg="kinova_custom_actions" type="turn_robot_server.py"/>
-    <node name="odom_navigation_server" pkg="kinova_custom_actions" type="odom_navigation_server.py"/>
+    <group if="$(arg navigation)">
+      <include file="$(find husky_navigation)/launch/gmapping_demo.launch"/>
+      <!-- <include file="$(find move_basic)/launch/move_basic.launch"/> -->
+      <node name="move_distance_server" pkg="kinova_custom_actions" type="move_distance_server.py"/>
+      <node name="turn_robot_server" pkg="kinova_custom_actions" type="turn_robot_server.py"/>
+      <node name="odom_navigation_server" pkg="kinova_custom_actions" type="odom_navigation_server.py"/>
+    </group>
 
     <!-- Manipulation-->
-    <include file="$(find husky_custom_moveit_config)/launch/husky_gen3_moveit_planning_execution.launch"/>
-    <include file="$(find husky_gen3_moveit_interface)/launch/move_group_python_interface.launch"/>
-    <include file="$(find kinova_custom_actions)/launch/kinova_place_object_server.launch"/>
+    <group if="$(arg manipulation)">
+      <include file="$(find husky_custom_moveit_config)/launch/husky_gen3_moveit_planning_execution.launch"/>
+      <include file="$(find husky_gen3_moveit_interface)/launch/move_group_python_interface.launch"/>
+      <include file="$(find kinova_custom_actions)/launch/kinova_place_object_server.launch"/>
+    </group>
 
     <!-- Visulisation-->
-    <include file="$(find husky_viz)/launch/view_robot.launch">
-      <arg name="config" value="mobile_manipulation.rviz"/>
-    </include>
+    <group if="$(arg viz)">
+      <include file="$(find husky_viz)/launch/view_robot.launch">
+        <arg name="config" value="$(arg rviz_config)"/>
+      </include>
+    </group>
 
     <!-- Husky teleop on secondary joystick -->
     <group ns="joy_teleop_desktop">
