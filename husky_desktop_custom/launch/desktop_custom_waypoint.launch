@@ -56,7 +56,7 @@
     </group>
 
     <!-- Husky teleop on secondary joystick -->
-    <group if="$(arg mobile_teleop)"/>
+    <group if="$(arg mobile_teleop)">
       <group ns="joy_teleop_desktop">
         <rosparam command="load" file="$(find husky_desktop_custom)/config/teleop_logitech.yaml" />
         <param name="joy_node/dev" value="$(arg joy_dev)" />
