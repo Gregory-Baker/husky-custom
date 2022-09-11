@@ -9,6 +9,7 @@ Environment Variables generally derived from /etc/ros/setup.bash
 <launch>
 
   <arg name="camera" default="zed"/>
+  <arg name="mobile_teleop" default="true"/>
   <arg name="kinova_joy" default="true"/>
   <arg name="kinova_joy_restricted" value="true"/>
   <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
@@ -69,6 +70,14 @@ Environment Variables generally derived from /etc/ros/setup.bash
     <node name="move_distance_server" pkg="husky_custom_actions" type="move_distance_server.py"/>
     <node name="turn_robot_server" pkg="husky_custom_actions" type="turn_robot_server.py"/>
     <node name="odom_navigation_server" pkg="husky_custom_actions" type="odom_navigation_server.py"/>
+  </group>
+
+  <!-- Husky teleop on secondary joystick -->
+  <group if="$(arg mobile_teleop)"/>
+    <group ns="joy_teleop_desktop">
+      <rosparam command="load" file="$(find husky_accessories)/config/teleop_logitech.yaml" />
+      <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
+    </group>
   </group>
 
 
