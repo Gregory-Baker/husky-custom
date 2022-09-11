@@ -9,7 +9,7 @@ Environment Variables generally derived from /etc/ros/setup.bash
 <launch>
 
   <arg name="camera" default="zed"/>
-  <arg name="kinova_joy" default="false"/>
+  <arg name="kinova_joy" default="true"/>
   <arg name="kinova_joy_restricted" value="true"/>
   <arg name="unity" default="true" doc="spawn ros_tcp_endpoint for Unity link"/>
 
@@ -60,6 +60,8 @@ Environment Variables generally derived from /etc/ros/setup.bash
             value="gst-launch-1.0 thetauvcsrc mode=4K ! queue ! h264parse ! rtph264pay mtu=1400 ! udpsink host=192.168.1.114 port=7000 sync=false"/>
     </node>
   </group>
+
+
 
   <group if="$(optenv HUSKY_KINOVA 0)">
     <include file="$(find husky_kinova_bringup)/launch/husky_gen3_bringup.launch">
