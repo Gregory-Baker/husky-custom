@@ -4,33 +4,30 @@
     <arg name="joystick" default="true" doc="joystick at teleop station"/>
     <arg name="joy_dev" default="$(optenv HUSKY_JOY_DEVICE /dev/input/js0)" />
     <arg name="kinova_joy" default="true" />
-    <arg name="control"/>
-    <arg name="delay" default="false"/>
-    <arg name="delay_long" default="false"/>
-    <arg name="delay_level" value="0.0" unless="$(eval delay or delay_long)"/>
-    <arg name="delay_level" value="0.5" if="$(eval delay)"/>
-    <arg name="delay_level" value="1.0" if="$(arg delay_long)"/>
-    <arg name="delay_condition" value="no_delay" unless="$(eval delay or delay_long)"/>
-    <arg name="delay_condition" value="delay" if="$(arg delay)"/>
-    <arg name="delay_condition" value="delay_long" if="$(arg delay_long)"/>
-    <arg name="tutorial" default="false"/>
+
+    <!--Participant id-->
+    <arg name="id" default="0"/>
+
+    <!--arg waypoint = true (waypoint) or false(direct)-->
+    <arg name="waypoint" default="true"/>
+    <arg name="control" value="direct" unless="$(arg waypoint)"/>
+    <arg name="control" value="waypoint" if="$(arg waypoint)"/>
+
+    <!--arg vr = true (vr) or false (screen)-->
+    <arg name="vr" default="true"/>
+    <arg name="interface" value="screen" unless="$(arg vr)"/>
+    <arg name="interface" value="vr" if="$(arg vr)"/>
+
+    <arg name="tutorial" default="true"/>
     <arg name="record" value="true" unless="$(arg tutorial)"/>
     <arg name="record" value="false" if="$(arg tutorial)"/>
 
+    <!--Use only if trial is interrupted part way through and you want to keep the videos from the previous sections-->
+    <arg name="part" default="1"/>
+
     <!-- Navigation and Mapping-->
     <include file="$(find husky_navigation)/launch/gmapping_demo.launch"/>
-    <!-- <group ns="move_basic">
-      <node name="move_basic" pkg="move_basic" type="move_basic">
-        <remap from="/scan" to="/scan_filtered"/>
-        <remap from="/move_base_simple/goal" to="move_base_simple/goal"/>
-        <param name="max_turning_velocity" value="0.5"/>
-        <param name="max_linear_velocity" value="0.3"/>
-        <param name="obstacle_wait_threshold" value="4"/>
-        <param name="forward_obstacle_threshold" value="0.7"/>
-        <param name="robot_front_length" value="0.5"/>
-        <param name="robot_back_length" value="0.5"/>
-      </node>
-    </group> -->
+    <!-- <include file="$(find move_basic)/launch/move_basic.launch"/> -->
 
 
     <node name="move_distance_server" pkg="kinova_custom_actions" type="move_distance_server.py"/>
@@ -47,27 +44,18 @@
       <arg name="config" value="mobile_manipulation.rviz"/>
     </include>
 
-    <!-- Teleop -->
-    <group if="$(arg joystick)">
-      <group ns="joy_teleop_desktop">
-        <rosparam command="load" file="$(find husky_desktop_custom)/config/teleop_logitech.yaml" />
-        <param name="joy_node/dev" value="$(arg joy_dev)" />
-        <node pkg="joy" type="joy_node" name="joy_node" />
-        <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy">
-          <!--remap from="joy" to="joy_delayed"/-->
-        </node>
-
-        <!-- <node pkg="dynamixel_pan_tilt" type="dynamixel_pan_tilt_joy.py" name="dynamixel_pan_tilt_joy_desktop"/>
-
-        <node pkg="husky_custom_accessories" type="republish_joy_with_delay.py" name="joy_republisher">
-          <param name="delay" value="$(arg delay_level)"/>
-        </node> -->
-      </group>
+    <!-- Husky teleop on secondary joystick -->
+    <group ns="joy_teleop_desktop">
+      <rosparam command="load" file="$(find husky_desktop_custom)/config/teleop_logitech.yaml" />
+      <param name="joy_node/dev" value="$(arg joy_dev)" />
+      <node pkg="joy" type="joy_node" name="joy_node" />
+      <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
     </group>
 
+    <!-- Kinova teleop on master controller-->
     <group if="$(arg kinova_joy)">
       <node name="kinova_joy_teleop" type="kinova_joy_teleop.py" pkg="kinova_joy_teleop">
-        <param name="restricted_mode" value="true"/>
+        <param name="restricted_mode" value="false"/>
         <param name="arm_ns" value="/kinova_arm"/>
         <param name="joy_topic" value="/joy_teleop/joy"/>
       </node>
@@ -79,37 +67,37 @@
         <arg name="camera_name" value="cam1"/>
         <arg name="width" value="1920"/>
         <arg name="height" value="1080"/>
-        <arg name="framerate" value="15"/>
+        <arg name="framerate" value="30"/>
       </include>
       <include file="$(find husky_desktop_custom)/launch/cv_cam.launch">
         <arg name="device_id" value="2"/>
         <arg name="camera_name" value="cam2"/>
         <arg name="width" value="1920"/>
         <arg name="height" value="1080"/>
-        <arg name="framerate" value="15"/>
+        <arg name="framerate" value="30"/>
       </include>
       <include file="$(find husky_desktop_custom)/launch/cv_cam.launch">
         <arg name="device_id" value="4"/>
         <arg name="camera_name" value="cam3"/>
-        <arg name="width" value="1920"/>
-        <arg name="height" value="1080"/>
-        <arg name="framerate" value="15"/>
+        <arg name="width" value="1280"/>
+        <arg name="height" value="720"/>
+        <arg name="framerate" value="30"/>
       </include>
 
 
       <node pkg="image_view" type="video_recorder" name="cam1_recorder" args="image:=/cam1/image_raw">
-        <param name="filename" value="$(env HOME)/MR_Experiment_Data/$(arg id)/$(arg delay_condition)/$(arg id)_$(arg control)_$(arg delay_condition)_cam1.avi"/>
+        <param name="filename" value="$(env HOME)/MR_Experiment_Data_2/id_$(arg id)/$(arg control)_$(arg interface)/id_$(arg id)_$(arg control)_$(arg interface)_$(arg part)_cam1.avi"/>
       </node>
       <node pkg="image_view" type="video_recorder" name="cam2_recorder" args="image:=/cam2/image_raw">
-        <param name="filename" value="$(env HOME)/MR_Experiment_Data/$(arg id)/$(arg delay_condition)/$(arg id)_$(arg control)_$(arg delay_condition)_cam2.avi"/>
+        <param name="filename" value="$(env HOME)/MR_Experiment_Data_2/id_$(arg id)/$(arg control)_$(arg interface)/id_$(arg id)_$(arg control)_$(arg interface)_$(arg part)_cam2.avi"/>
       </node>
       <node pkg="image_view" type="video_recorder" name="cam3_recorder" args="image:=/cam3/image_raw">
-        <param name="filename" value="$(env HOME)/MR_Experiment_Data/$(arg id)/$(arg delay_condition)/$(arg id)_$(arg control)_$(arg delay_condition)_cam3.avi"/>
+        <param name="filename" value="$(env HOME)/MR_Experiment_Data_2/id_$(arg id)/$(arg control)_$(arg interface)/id_$(arg id)_$(arg control)_$(arg interface)_$(arg part)_cam3.avi"/>
       </node>
 
       <node pkg="rosbag" type="record" name="rosbag_record_node"
         args="record 
-        -o $(env HOME)/MR_Experiment_Data/$(arg id)/$(arg delay_condition)/$(arg id)_$(arg control)_$(arg delay_condition) 
+        -o $(env HOME)/MR_Experiment_Data_2/id_$(arg id)/$(arg control)_$(arg interface)/id_$(arg id)_$(arg control)_$(arg part)
         /rosout 
         /tf 
         /odometry/filtered 
