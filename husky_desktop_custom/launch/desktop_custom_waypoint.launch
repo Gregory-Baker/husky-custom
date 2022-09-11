@@ -35,9 +35,9 @@
     <group if="$(arg navigation)">
       <include file="$(find husky_navigation)/launch/gmapping_demo.launch"/>
       <!-- <include file="$(find move_basic)/launch/move_basic.launch"/> -->
-      <node name="move_distance_server" pkg="kinova_custom_actions" type="move_distance_server.py"/>
-      <node name="turn_robot_server" pkg="kinova_custom_actions" type="turn_robot_server.py"/>
-      <node name="odom_navigation_server" pkg="kinova_custom_actions" type="odom_navigation_server.py"/>
+      <node name="move_distance_server" pkg="husky_custom_actions" type="move_distance_server.py"/>
+      <node name="turn_robot_server" pkg="husky_custom_actions" type="turn_robot_server.py"/>
+      <node name="odom_navigation_server" pkg="husky_custom_actions" type="odom_navigation_server.py"/>
     </group>
 
     <!-- Manipulation-->
