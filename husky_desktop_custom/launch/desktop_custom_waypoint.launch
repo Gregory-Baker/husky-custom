@@ -6,6 +6,7 @@
     <arg name="kinova_joy" default="true" />
     <arg name="navigation" default="false"/>
     <arg name="manipulation" default="false"/>
+    <arg name="mobile_teleop" default="false"/>
     <arg name="viz" default="true"/>
     
     <arg name="rviz_config" value="mapping.rviz" unless="$(arg manipulation)"/>
@@ -55,11 +56,13 @@
     </group>
 
     <!-- Husky teleop on secondary joystick -->
-    <group ns="joy_teleop_desktop">
-      <rosparam command="load" file="$(find husky_desktop_custom)/config/teleop_logitech.yaml" />
-      <param name="joy_node/dev" value="$(arg joy_dev)" />
-      <node pkg="joy" type="joy_node" name="joy_node" />
-      <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
+    <group if="$(arg mobile_teleop)">
+      <group ns="joy_teleop_desktop">
+        <rosparam command="load" file="$(find husky_desktop_custom)/config/teleop_logitech.yaml" />
+        <param name="joy_node/dev" value="$(arg joy_dev)" />
+        <node pkg="joy" type="joy_node" name="joy_node" />
+        <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
+      </group>
     </group>
 
     <!-- Kinova teleop on master controller-->
